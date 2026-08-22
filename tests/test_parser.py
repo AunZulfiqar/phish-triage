@@ -89,6 +89,30 @@ def test_hidden_text_is_recorded_but_not_counted_as_visible():
     assert msg.html_facts.visible_text_len > 20
 
 
+def test_white_text_on_a_painted_background_is_not_hidden():
+    """A white-on-blue call-to-action button is styling, not concealment."""
+    html = ('<a href="https://example.com/go" '
+            'style="background:#0067b8;color:#fff;padding:12px 26px">Sign in</a>')
+    raw = build_eml({"From": "a@example.net"}, html, content_type="text/html")
+    msg = parse_bytes(raw)
+    assert not msg.html_facts.hidden_text
+
+
+def test_white_text_with_no_background_is_hidden():
+    html = '<div style="color:#ffffff">invisible filter poison</div>'
+    raw = build_eml({"From": "a@example.net"}, html, content_type="text/html")
+    msg = parse_bytes(raw)
+    assert msg.html_facts.hidden_text
+    assert "poison" in msg.html_facts.hidden_text[0]
+
+
+def test_white_text_on_a_white_background_is_hidden():
+    html = '<div style="background:#ffffff;color:#fff">invisible filter poison</div>'
+    raw = build_eml({"From": "a@example.net"}, html, content_type="text/html")
+    msg = parse_bytes(raw)
+    assert msg.html_facts.hidden_text
+
+
 def test_script_and_style_content_is_not_treated_as_body_text():
     html = "<style>.a{color:red}</style><script>var x=1;</script><p>Real text.</p>"
     raw = build_eml({"From": "a@example.net"}, html, content_type="text/html")

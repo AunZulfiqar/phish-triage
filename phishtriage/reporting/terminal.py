@@ -79,8 +79,13 @@ def _summary_table(report: Report) -> Table:
     table.add_column(overflow="fold")
 
     def row(label: str, value: str, style: str = "") -> None:
+        # Always Text(), never a bare string. Rich parses square-bracket markup
+        # in plain strings, and defanged output is full of brackets -- "[@]"
+        # matches Rich's tag syntax and was being swallowed, silently printing
+        # a sender address with no @ in it. Everything here is also
+        # attacker-controlled, so markup must never be interpreted.
         if value:
-            table.add_row(label, Text(value, style=style) if style else value)
+            table.add_row(label, Text(value, style=style))
 
     row("Subject", defang.defang_text(msg.subject) or "(none)")
     display = f"{msg.from_display} " if msg.from_display else ""
@@ -113,11 +118,11 @@ def _findings_table(report: Report, glyphs: dict[str, str]) -> Group:
         for f in findings:
             style = _SEVERITY_STYLE[f.indicator.severity]
             table.add_row(
-                f.id,
+                Text(f.id),
                 Text(f.indicator.severity.value.upper(), style=style),
-                str(f.indicator.weight),
+                Text(str(f.indicator.weight)),
                 Text(f.indicator.name, style=style),
-                defang.defang_text(f.evidence),
+                Text(defang.defang_text(f.evidence)),
             )
         blocks.append(Rule(_CATEGORY_TITLE.get(category, category), style="dim"))
         blocks.append(table)
@@ -143,7 +148,7 @@ def _ioc_table(report: Report, glyphs: dict[str, str]) -> Table | Text:
     table.add_column("Type", style="bold cyan", no_wrap=True)
     table.add_column("Observable", overflow="fold")
     for kind, value in rows:
-        table.add_row(kind, value)
+        table.add_row(Text(kind), Text(value))
     return table
 
 

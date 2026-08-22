@@ -13,7 +13,7 @@
 ╭────────────────────────────────────────── MESSAGE ───────────────────────────────────────────╮
 │                                                                                              │
 │  Subject      Action required: unusual sign-in activity on your Microsoft account            │
-│  From         Microsoft 365 Security <alertsmicros0ft-security[.]tk>                         │
+│  From         Microsoft 365 Security <alerts[@]micros0ft-security[.]tk>                      │
 │  Reply-To     credential.review[@]mail-verify-desk[.]top                                     │
 │  Return-Path  micros0ft-security[.]tk                                                        │
 │  Date         Sat, 14 Mar 2026 14:12:04 +0000                                                │
@@ -41,12 +41,10 @@
 │  CNT-006   CRITICAL  20 Credential form embedded in the    HTML form in the body collects    │
 │                         message body                       name:otp, name:password,          │
 │                                                            password                          │
-│  CNT-004   HIGH      13 Hidden text in the HTML body       126 characters of hidden text,    │
+│  CNT-004   HIGH      13 Hidden text in the HTML body       86 characters of hidden text,     │
 │                                                            e.g. 'newsletter update           │
 │                                                            quarterly report shipping         │
-│                                                            confirmation inv |                │
-│                                                            hxxps[://]login[.]microsoftonli   │
-│                                                            ne[.]com/verify'                  │
+│                                                            confirmation inv'                 │
 │  CNT-002   MEDIUM     9 Credential-harvest phrasing        Credential-request wording:       │
 │                                                            'unusual sign-in', 'your          │
 │                                                            account has been locked',         │

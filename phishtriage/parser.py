@@ -64,8 +64,16 @@ class _HtmlHarvester(HTMLParser):
         re.compile(r"visibility\s*:\s*hidden", re.IGNORECASE),
         re.compile(r"font-size\s*:\s*0(?:\.0+)?(?:px|pt|em|%)?", re.IGNORECASE),
         re.compile(r"opacity\s*:\s*0(?:\.0+)?\b", re.IGNORECASE),
-        re.compile(r"(?:^|;)\s*color\s*:\s*#?(?:fff(?:fff)?|white)\b", re.IGNORECASE),
         re.compile(r"height\s*:\s*0(?:px)?\s*(?:;|$)", re.IGNORECASE),
+    )
+
+    _WHITE_TEXT_RE = re.compile(
+        r"(?:^|;)\s*color\s*:\s*(?:#?(?:fff(?:fff)?)|white)\b", re.IGNORECASE
+    )
+    # Any background that is not itself white or transparent.
+    _PAINTED_BACKGROUND_RE = re.compile(
+        r"background(?:-color)?\s*:\s*(?!\s*(?:transparent|none|#?fff(?:fff)?|white)\b)[^;]+",
+        re.IGNORECASE,
     )
 
     def __init__(self) -> None:
@@ -81,6 +89,12 @@ class _HtmlHarvester(HTMLParser):
     def _is_hidden(cls, attrs: dict[str, str]) -> bool:
         style = attrs.get("style", "")
         if any(p.search(style) for p in cls._HIDING_PATTERNS):
+            return True
+        # White text only hides something when nothing is painted behind it.
+        # White-on-blue is an ordinary call-to-action button, and treating it as
+        # concealment flagged the most visible element of the message as the
+        # most suspicious one.
+        if cls._WHITE_TEXT_RE.search(style) and not cls._PAINTED_BACKGROUND_RE.search(style):
             return True
         if attrs.get("hidden") is not None:
             return True

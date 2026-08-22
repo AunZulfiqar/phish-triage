@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT))
 
 from phishtriage import catalog  # noqa: E402
 from phishtriage.analyzers import Context, analyze_file  # noqa: E402
-from phishtriage.reporting import terminal  # noqa: E402
+from phishtriage.reporting import html_out, terminal  # noqa: E402
 
 DOCS = ROOT / "docs"
 
@@ -59,21 +59,32 @@ def render_indicators() -> str:
     return out.getvalue()
 
 
+DEMO_CTX = Context(org_domains=("example-corp.com",))
+DEMO_SAMPLE = "credential-phish.eml"
+
+
+def _demo_report():
+    return analyze_file(ROOT / "samples" / DEMO_SAMPLE, DEMO_CTX)
+
+
 def render_demo() -> str:
     from rich.console import Console
 
     buffer = io.StringIO()
     console = Console(file=buffer, width=96, force_terminal=False, legacy_windows=False)
-    report = analyze_file(ROOT / "samples" / "credential-phish.eml",
-                          Context(org_domains=("example-corp.com",)))
-    terminal.render(report, console)
+    terminal.render(_demo_report(), console)
     return buffer.getvalue()
+
+
+def render_sample_html() -> str:
+    return html_out.render(_demo_report())
 
 
 def main() -> None:
     DOCS.mkdir(exist_ok=True)
     for name, content in (("indicators.md", render_indicators()),
-                          ("demo-output.txt", render_demo())):
+                          ("demo-output.txt", render_demo()),
+                          ("sample-report.html", render_sample_html())):
         path = DOCS / name
         path.write_text(content, encoding="utf-8")
         print(f"wrote {path.relative_to(ROOT)} ({len(content):,} chars)")

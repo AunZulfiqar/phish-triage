@@ -65,6 +65,36 @@ class TestRendering:
         assert "MESSAGE" in out
 
 
+class TestMarkupIsNotInterpreted:
+    """Rich parses square-bracket markup in bare strings.
+
+    Defanged output is made of square brackets, and every string in a report
+    originates from an attacker-controlled message. Both facts point the same
+    way: nothing may reach the console as a plain string.
+    """
+
+    def test_defanged_at_sign_survives_rendering(self, malicious):
+        """`[@]` matches Rich's tag syntax and was silently swallowed, printing
+        a sender address with no @ in it at all."""
+        out = render_to_string(malicious)
+        assert "[@]" in out
+        assert "alerts[@]micros0ft-security[.]tk" in out.replace("\n", "")
+
+    def test_markup_in_a_subject_is_not_executed(self):
+        raw = build_eml(
+            {"From": "a@example.com", "Subject": "[bold red]URGENT[/bold red] [blink]now"},
+            "Short note.",
+        )
+        out = render_to_string(analyze_bytes(raw, "<test>"))
+        assert "[bold red]URGENT[/bold red]" in out.replace("\n", "")
+
+    def test_unclosed_markup_tag_does_not_raise(self):
+        """An unclosed tag makes Rich raise MarkupError and lose the report."""
+        raw = build_eml({"From": "a@example.com", "Subject": "[/not-a-real-tag"}, "body")
+        out = render_to_string(analyze_bytes(raw, "<test>"))
+        assert "MESSAGE" in out
+
+
 class TestEncodingFallback:
     """A console that cannot encode block glyphs must still get a report."""
 

@@ -87,15 +87,15 @@
 <div class="wrap">
   <h1>Phishing triage report</h1>
   <p class="sub">
-    <span class="mono">samples\credential-phish.eml</span> ·
-    generated 2026-08-22 12:43:39 UTC ·
+    <span class="mono">D:\Claude skills\phish-triage\samples\credential-phish.eml</span> ·
+    generated 2026-08-22 12:50:44 UTC ·
     offline analysis
   </p>
 
   <div class="verdict" style="--v: var(--malicious)">
     <span class="label">Malicious</span><span class="score">100/100</span>
     <div class="bar"><i></i></div>
-    <div class="why">Malicious - score 100/100 (19 indicator(s) across 4 category(ies); weight 199; +14 corroboration)</div>
+    <div class="why">Malicious - score 100/100 (20 indicator(s) across 4 category(ies); weight 204; +14 corroboration)</div>
   </div>
 
   <h2>Message</h2>
@@ -107,7 +107,7 @@
     <dt>Structure</dt><dd>1 relay hop(s) · 3 URL(s) · 0 attachment(s) · 2,340 bytes</dd>
   </dl>
 
-  <h2>Indicators (19)</h2>
+  <h2>Indicators (20)</h2>
       <h2 style="margin-top:1.5rem">Authentication (SPF / DKIM / DMARC)</h2>
       <div class="scroll">
         <table>
@@ -154,7 +154,7 @@
               <td class="sev sev-high">high</td>
               <td class="wt">13</td>
               <td><strong>Hidden text in the HTML body</strong><br><span class="note">Text rendered invisible with zero font size, display:none or background-matched colour, used to poison keyword-based filters.</span></td>
-              <td class="mono">126 characters of hidden text, e.g. &#39;newsletter update quarterly report shipping confirmation inv | hxxps[://]login[.]microsoftonline[.]com/verify&#39;</td>
+              <td class="mono">86 characters of hidden text, e.g. &#39;newsletter update quarterly report shipping confirmation inv&#39;</td>
             </tr>
             <tr>
               <td class="mono">CNT-002</td>
@@ -262,6 +262,13 @@
               <td class="wt">5</td>
               <td><strong>Message-ID domain does not match sender</strong><br><span class="note">The Message-ID was minted by infrastructure unrelated to the sending domain.</span></td>
               <td class="mono">Message-ID was issued by hosting-cheap[.]xyz, sender domain is micros0ft-security[.]tk</td>
+            </tr>
+            <tr>
+              <td class="mono">HDR-011</td>
+              <td class="sev sev-low">low</td>
+              <td class="wt">5</td>
+              <td><strong>Recipient does not appear in To or Cc</strong><br><span class="note">The message was blind-copied, typical of bulk phishing runs.</span></td>
+              <td class="mono">Message has no To or Cc recipients at all</td>
             </tr>
             <tr>
               <td class="mono">HDR-007</td>

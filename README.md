@@ -8,7 +8,7 @@ Drop in a `.eml`, get back a defanged, evidence-backed verdict you can paste str
 
 [![CI](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml/badge.svg)](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-113%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-119%20passing-2ea44f)
 ![Coverage](https://img.shields.io/badge/coverage-86%25-2ea44f)
 ![Indicators](https://img.shields.io/badge/indicators-58-3B82F6)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
@@ -60,7 +60,7 @@ $ phish-triage analyze samples/credential-phish.eml --org-domain example-corp.co
 │  MALICIOUS   100/100                                                     │
 │  ████████████████████████████████████████                                │
 │  Malicious - score 100/100 (20 indicator(s) across 4 category(ies);      │
-│  weight 184; +14 corroboration)                                          │
+│  weight 204; +14 corroboration)                                          │
 └──────────────────────────────────────────────────────────────────────────┘
 
 ──────────────────── Authentication (SPF / DKIM / DMARC) ────────────────────
@@ -85,8 +85,8 @@ $ phish-triage analyze samples/credential-phish.eml --org-domain example-corp.co
  CNT-006   CRITICAL  20  Credential form embedded in the message body
                          HTML form in the body collects name:password, password
  CNT-004   HIGH      13  Hidden text in the HTML body
-                         318 characters of hidden text, e.g. 'newsletter update
-                         quarterly report shipping confirmation invoice...'
+                         86 characters of hidden text, e.g. 'newsletter update
+                         quarterly report shipping confirmation inv'
 
 MITRE ATT&CK   T1204.001  T1566.002  T1598.003  T1656
 ```
@@ -219,7 +219,7 @@ containment tool.
 
 ```bash
 pip install -e ".[dev]"
-pytest                       # 113 tests
+pytest                       # 119 tests
 pytest --cov=phishtriage     # 86% coverage
 ruff check .
 python samples/generate.py   # regenerate the sample corpus

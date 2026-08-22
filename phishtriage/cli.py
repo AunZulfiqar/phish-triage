@@ -158,6 +158,7 @@ def _emit_batch(reports: list[Report], args, console: Console) -> None:
 
 def _print_batch_table(reports: list[Report], console: Console) -> None:
     from rich.table import Table
+    from rich.text import Text
 
     table = Table(title=f"Batch summary: {len(reports)} message(s)", title_justify="left")
     table.add_column("File", overflow="fold")
@@ -165,11 +166,13 @@ def _print_batch_table(reports: list[Report], console: Console) -> None:
     table.add_column("Score", justify="right", no_wrap=True)
     table.add_column("Top indicators", overflow="fold")
     for report in sorted(reports, key=lambda r: -r.score):
+        # Filenames are untrusted; only the verdict cell uses markup, and its
+        # content comes from a closed enum rather than the message.
         table.add_row(
-            Path(report.email.source_path).name,
+            Text(Path(report.email.source_path).name),
             f"[{report.verdict.colour}]{report.verdict.value}[/{report.verdict.colour}]",
-            str(report.score),
-            ", ".join(f.id for f in report.findings[:5]) or "-",
+            Text(str(report.score)),
+            Text(", ".join(f.id for f in report.findings[:5]) or "-"),
         )
     console.print(table)
 
