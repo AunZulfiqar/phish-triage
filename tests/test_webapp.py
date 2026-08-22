@@ -292,6 +292,39 @@ class TestAPI:
         assert response.status_code == 404
 
 
+class TestStaticAssets:
+    def test_stylesheet_does_not_animate_layout_properties(self, client):
+        """Animating width/height/margin forces layout on every frame.
+
+        The score bar deliberately uses a transform instead; this keeps it that
+        way, since the CSS is easy to "fix" back to something that looks
+        identical and janks.
+        """
+        css = client.get("/static/app.css").get_data(as_text=True)
+        import re
+
+        for block in re.findall(r"transition:\s*([^;}]+)", css):
+            for prop in ("width", "height", "margin", "padding", "top", "left"):
+                assert prop not in block, f"transition animates layout property: {block.strip()}"
+
+    def test_score_bar_is_hidden_until_scripted(self, client):
+        """An unpainted bar sits at scaleX(0) and would read as a score of 0."""
+        css = client.get("/static/app.css").get_data(as_text=True)
+        assert "visibility: hidden" in css
+        assert ".bar.is-painted" in css
+        js = client.get("/static/app.js").get_data(as_text=True)
+        assert "is-painted" in js
+        assert "scaleX(" in js
+
+    def test_no_external_resources_are_referenced(self, client):
+        """CSP would block them anyway; this catches it at review time."""
+        for asset in ("/static/app.css", "/static/app.js"):
+            body = client.get(asset).get_data(as_text=True)
+            assert "http://" not in body
+            assert "https://" not in body
+            assert "@import" not in body
+
+
 class TestResultStore:
     def test_results_expire(self):
         from webapp.store import ResultStore

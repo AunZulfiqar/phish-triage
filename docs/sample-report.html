@@ -48,9 +48,12 @@
     font-size: .86em;
   }
 
+  /* The verdict colour already carries in the label and the bar; a heavy side
+     stripe would state it a third time. Tinted border and wash instead. */
   .verdict {
-    border: 1px solid var(--border); border-left: 5px solid var(--v);
-    background: var(--panel); border-radius: 10px; padding: 1.25rem 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--v) 30%, var(--border));
+    background: color-mix(in srgb, var(--v) 4%, var(--panel));
+    border-radius: 10px; padding: 1.25rem 1.5rem;
   }
   .verdict .label { font-size: 1.5rem; font-weight: 800; color: var(--v); letter-spacing: -.02em; }
   .verdict .score { font-size: 1.5rem; font-weight: 800; margin-left: .6rem; }

@@ -16,7 +16,13 @@
       var fill = bar.querySelector("i");
       if (!fill) return;
       var score = Math.max(0, Math.min(100, parseInt(bar.dataset.score, 10) || 0));
-      requestAnimationFrame(function () { fill.style.width = score + "%"; });
+      bar.classList.add("is-painted");
+      // Flush the scaleX(0) start value, then set the target so the transition
+      // has two states to move between. requestAnimationFrame would do the same
+      // job but never fires in a background tab, which would leave the bar
+      // empty next to a non-zero score until the tab was focused.
+      void fill.offsetWidth;
+      fill.style.transform = "scaleX(" + score / 100 + ")";
     });
   }
 
