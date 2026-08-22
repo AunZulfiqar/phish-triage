@@ -1,0 +1,23 @@
+Received: from smtp.stripe.com (smtp-14.stripe.com [192.0.2.114]) by mx.example-corp.com with ESMTPS id 7Lp3; Sat, 14 Mar 2026 11:12:04 +0000
+Received: from worker-9.stripe.internal (unknown [10.4.2.9]) by smtp.stripe.com with ESMTP id 2Nn8; Sat, 14 Mar 2026 11:11:59 +0000
+Authentication-Results: mx.example-corp.com; spf=pass smtp.mailfrom=receipts@stripe.com; dkim=pass header.d=stripe.com; dmarc=pass header.from=stripe.com
+DKIM-Signature: v=1; a=rsa-sha256; d=stripe.com; s=r1; b=Qp4mZ1a=
+Return-Path: <receipts@stripe.com>
+From: Stripe <receipts@stripe.com>
+To: aun@example-corp.com
+Subject: Your receipt from Example Corp #2761-4482
+Date: Sat, 14 Mar 2026 11:12:04 +0000
+Message-ID: <rcpt-2761-4482-9f1e@stripe.com>
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<h3>Receipt #2761-4482</h3>
+<p>Thanks for your payment. Your invoice is now marked as paid.</p>
+<table><tr><td>Amount</td><td>$49.00</td></tr>
+<tr><td>Date</td><td>14 March 2026</td></tr></table>
+<p><a href="https://dashboard.stripe.com/receipts/2761-4482">View receipt</a> ·
+<a href="https://dashboard.stripe.com/invoices">Billing history</a> ·
+<a href="https://support.stripe.com">Contact support</a></p>
+<p>If you need to update your payment details, do so from your
+<a href="https://dashboard.stripe.com/settings/billing">billing settings</a>.</p>
+</body></html>

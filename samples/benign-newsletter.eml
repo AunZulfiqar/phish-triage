@@ -1,0 +1,27 @@
+Received: from mail.github.com (out-27.smtp.github.com [192.0.2.27]) by mx.example-corp.com with ESMTPS id 4Kx8m2; Sat, 14 Mar 2026 09:12:04 +0000
+Received: from github-mailer.internal (localhost [127.0.0.1]) by mail.github.com with ESMTP id 9Qm1; Sat, 14 Mar 2026 09:12:01 +0000
+Authentication-Results: mx.example-corp.com; spf=pass smtp.mailfrom=noreply@github.com; dkim=pass header.d=github.com; dmarc=pass header.from=github.com
+Received-SPF: pass (mx.example-corp.com: domain of github.com designates 192.0.2.27 as permitted sender)
+DKIM-Signature: v=1; a=rsa-sha256; d=github.com; s=pf2023; c=relaxed/relaxed; h=from:to:subject:date; bh=Zx1p9m4Q=; b=Kd8fLp2Q==
+Return-Path: <noreply@github.com>
+From: GitHub <noreply@github.com>
+To: aun@example-corp.com
+Subject: Your weekly digest: 4 repositories you follow had releases
+Date: Sat, 14 Mar 2026 09:12:04 +0000
+Message-ID: <a91f2c04-7d3e-4b11-8f60-2c9e4a1b7d55@github.com>
+List-Unsubscribe: <https://github.com/settings/notifications>
+Content-Type: text/html; charset="utf-8"
+
+<html><body style="font-family:sans-serif">
+<h2>Your weekly digest</h2>
+<p>Hi Aun, here is what happened in the repositories you follow this week.</p>
+<ul>
+  <li><a href="https://github.com/SigmaHQ/sigma/releases">SigmaHQ/sigma</a> published r2026-03-11</li>
+  <li><a href="https://github.com/volatilityfoundation/volatility3/releases">volatility3</a> published v2.9.0</li>
+  <li><a href="https://github.com/Yamato-Security/hayabusa/releases">hayabusa</a> published v2.18.0</li>
+  <li><a href="https://github.com/arkime/arkime/releases">arkime</a> published v5.2.0</li>
+</ul>
+<p><a href="https://github.com/settings/notifications">Manage your notification settings</a>
+or <a href="https://github.com/settings/notifications">unsubscribe</a>.</p>
+<p style="color:#888;font-size:12px">GitHub, Inc. 88 Colin P Kelly Jr Street, San Francisco, CA 94107</p>
+</body></html>

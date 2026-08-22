@@ -1,0 +1,203 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>phish-triage — {{ d.text(report.email.subject[:60]) or 'Untitled message' }}</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f7f9fc; --border: #dde5ef; --ink: #16202e;
+    --muted: #5d6b7f; --accent: #2563eb;
+    --critical: #b91c1c; --high: #dc2626; --medium: #b45309;
+    --low: #0e7490; --info: #64748b;
+    --benign: #15803d; --suspicious: #b45309;
+    --likely: #ea580c; --malicious: #b91c1c;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0f16; --panel: #131a25; --border: #253044; --ink: #e6edf6;
+      --muted: #93a3b8; --accent: #60a5fa;
+      --critical: #f87171; --high: #fb7185; --medium: #fbbf24;
+      --low: #38bdf8; --info: #94a3b8;
+      --benign: #4ade80; --suspicious: #fbbf24;
+      --likely: #fb923c; --malicious: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f16; --panel: #131a25; --border: #253044; --ink: #e6edf6;
+    --muted: #93a3b8; --accent: #60a5fa;
+    --critical: #f87171; --high: #fb7185; --medium: #fbbf24;
+    --low: #38bdf8; --info: #94a3b8;
+    --benign: #4ade80; --suspicious: #fbbf24;
+    --likely: #fb923c; --malicious: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1.25rem 4rem;
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  h2 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--muted); margin: 2.25rem 0 .75rem; font-weight: 700;
+  }
+  .sub { color: var(--muted); font-size: .85rem; margin: 0 0 2rem; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .86em;
+  }
+
+  .verdict {
+    border: 1px solid var(--border); border-left: 5px solid var(--v);
+    background: var(--panel); border-radius: 10px; padding: 1.25rem 1.5rem;
+  }
+  .verdict .label { font-size: 1.5rem; font-weight: 800; color: var(--v); letter-spacing: -.02em; }
+  .verdict .score { font-size: 1.5rem; font-weight: 800; margin-left: .6rem; }
+  .verdict .why { color: var(--muted); font-size: .85rem; margin-top: .5rem; }
+  .bar { height: 8px; border-radius: 999px; background: var(--border); margin-top: .9rem; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--v); width: {{ report.score }}%; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  .scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  th, td { text-align: left; padding: .6rem .8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--panel); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td.wt { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+  .sev { font-weight: 700; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  .sev-critical { color: var(--critical); } .sev-high { color: var(--high); }
+  .sev-medium  { color: var(--medium); }   .sev-low  { color: var(--low); }
+  .sev-info     { color: var(--info); }
+
+  dl.meta { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1.25rem; margin: 0; }
+  dl.meta dt { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  dl.meta dd { margin: 0; word-break: break-word; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip {
+    border: 1px solid var(--border); background: var(--panel);
+    border-radius: 999px; padding: .18rem .65rem; font-size: .78rem;
+  }
+  .chip.attack { color: var(--accent); border-color: var(--accent); }
+  .note { color: var(--muted); font-size: .82rem; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .78rem; }
+</style>
+
+<div class="wrap">
+  <h1>Phishing triage report</h1>
+  <p class="sub">
+    <span class="mono">{{ report.email.source_path }}</span> ·
+    generated {{ report.generated_at.strftime('%Y-%m-%d %H:%M:%S UTC') }} ·
+    {{ 'online checks enabled' if report.online_checks else 'offline analysis' }}
+  </p>
+
+  <div class="verdict" style="--v: var(--{{ verdict_var }})">
+    <span class="label">{{ report.verdict.value }}</span><span class="score">{{ report.score }}/100</span>
+    <div class="bar"><i></i></div>
+    <div class="why">{{ rationale }}</div>
+  </div>
+
+  <h2>Message</h2>
+  <dl class="meta">
+    <dt>Subject</dt><dd>{{ d.text(report.email.subject) or '(none)' }}</dd>
+    <dt>From</dt><dd>{{ report.email.from_display }} &lt;<span class="mono">{{ d.email(report.email.from_address) }}</span>&gt;</dd>
+    {% if report.email.reply_to %}<dt>Reply-To</dt><dd class="mono">{{ d.email(report.email.reply_to) }}</dd>{% endif %}
+    {% if report.email.return_path %}<dt>Return-Path</dt><dd class="mono">{{ d.domain(report.email.return_path) }}</dd>{% endif %}
+    {% if report.email.to %}<dt>To</dt><dd class="mono">{{ report.email.to | map('string') | join(', ') }}</dd>{% endif %}
+    <dt>Date</dt><dd>{{ report.email.date_header or '(none)' }}</dd>
+    <dt>Message-ID</dt><dd class="mono">{{ report.email.message_id or '(none)' }}</dd>
+    <dt>Structure</dt><dd>{{ report.email.hops | length }} relay hop(s) · {{ report.email.urls | length }} URL(s) · {{ report.email.attachments | length }} attachment(s) · {{ '{:,}'.format(report.email.raw_size) }} bytes</dd>
+  </dl>
+
+  <h2>Indicators ({{ report.findings | length }})</h2>
+  {% if report.findings %}
+    {% for category, findings in grouped.items() %}
+      <h2 style="margin-top:1.5rem">{{ category_titles.get(category, category) }}</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Severity</th><th>Wt</th><th>Indicator</th><th>Evidence</th></tr></thead>
+          <tbody>
+            {% for f in findings %}
+            <tr>
+              <td class="mono">{{ f.indicator.id }}</td>
+              <td class="sev sev-{{ f.indicator.severity.value }}">{{ f.indicator.severity.value }}</td>
+              <td class="wt">{{ f.indicator.weight }}</td>
+              <td><strong>{{ f.indicator.name }}</strong><br><span class="note">{{ f.indicator.description }}</span></td>
+              <td class="mono">{{ d.text(f.evidence) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="note">No indicators fired.</p>
+  {% endif %}
+
+  {% if report.attack_techniques %}
+  <h2>MITRE ATT&amp;CK</h2>
+  <div class="chips">
+    {% for t in report.attack_techniques %}<span class="chip attack mono">{{ t }}</span>{% endfor %}
+  </div>
+  {% endif %}
+
+  <h2>Observables <span class="note">(defanged)</span></h2>
+  {% if iocs %}
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Type</th><th>Value</th></tr></thead>
+      <tbody>
+        {% for ioc in iocs %}<tr><td class="mono">{{ ioc.type }}</td><td class="mono">{{ ioc.value }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="note">No observables extracted.</p>{% endif %}
+
+  {% if report.email.attachments %}
+  <h2>Attachments</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Filename</th><th>Content-Type</th><th>Size</th><th>SHA-256</th></tr></thead>
+      <tbody>
+        {% for a in report.email.attachments %}
+        <tr>
+          <td class="mono">{{ d.text(a.filename) }}</td>
+          <td class="mono">{{ a.content_type }}</td>
+          <td class="wt">{{ '{:,}'.format(a.size) }}</td>
+          <td class="mono" style="word-break:break-all">{{ a.sha256 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if report.email.hops %}
+  <h2>Delivery path</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>#</th><th>From</th><th>IP</th><th>By</th><th>Proto</th><th>Timestamp</th><th>Delay</th></tr></thead>
+      <tbody>
+        {% for h in report.email.hops %}
+        <tr>
+          <td class="wt">{{ h.index }}</td>
+          <td class="mono">{{ h.from_host or '—' }}</td>
+          <td class="mono">{{ d.ip(h.from_ip) or '—' }}</td>
+          <td class="mono">{{ h.by_host or '—' }}</td>
+          <td class="mono">{{ h.with_proto or '—' }}</td>
+          <td class="mono">{{ h.timestamp.strftime('%Y-%m-%d %H:%M:%S %z') if h.timestamp else '—' }}</td>
+          <td class="wt">{{ '%.0fs' % h.delay_seconds if h.delay_seconds is not none else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <footer>
+    Generated by <strong>phish-triage</strong> — static analysis only. No URL was resolved and no
+    attachment was executed. Scores are a transparent weighted sum of the indicators listed above,
+    not a machine-learning prediction; treat them as triage input, not as a final determination.
+  </footer>
+</div>

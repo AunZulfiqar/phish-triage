@@ -1,0 +1,11 @@
+# Normalise source to LF in the repository.
+* text=auto eol=lf
+
+# RFC 5322 requires CRLF line endings, and the parser is tested against them.
+# Letting git normalise these would rewrite the fixtures on checkout and break
+# both the header parsing tests and the CI reproducibility check.
+*.eml -text
+
+# Captured terminal output, committed verbatim as a documentation artifact.
+docs/demo-output.txt -text
+docs/sample-report.html -text

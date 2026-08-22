@@ -1,0 +1,314 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>phish-triage — Action required: unusual sign-in activity on your Microsoft </title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f7f9fc; --border: #dde5ef; --ink: #16202e;
+    --muted: #5d6b7f; --accent: #2563eb;
+    --critical: #b91c1c; --high: #dc2626; --medium: #b45309;
+    --low: #0e7490; --info: #64748b;
+    --benign: #15803d; --suspicious: #b45309;
+    --likely: #ea580c; --malicious: #b91c1c;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0f16; --panel: #131a25; --border: #253044; --ink: #e6edf6;
+      --muted: #93a3b8; --accent: #60a5fa;
+      --critical: #f87171; --high: #fb7185; --medium: #fbbf24;
+      --low: #38bdf8; --info: #94a3b8;
+      --benign: #4ade80; --suspicious: #fbbf24;
+      --likely: #fb923c; --malicious: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f16; --panel: #131a25; --border: #253044; --ink: #e6edf6;
+    --muted: #93a3b8; --accent: #60a5fa;
+    --critical: #f87171; --high: #fb7185; --medium: #fbbf24;
+    --low: #38bdf8; --info: #94a3b8;
+    --benign: #4ade80; --suspicious: #fbbf24;
+    --likely: #fb923c; --malicious: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1.25rem 4rem;
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  h2 {
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--muted); margin: 2.25rem 0 .75rem; font-weight: 700;
+  }
+  .sub { color: var(--muted); font-size: .85rem; margin: 0 0 2rem; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .86em;
+  }
+
+  .verdict {
+    border: 1px solid var(--border); border-left: 5px solid var(--v);
+    background: var(--panel); border-radius: 10px; padding: 1.25rem 1.5rem;
+  }
+  .verdict .label { font-size: 1.5rem; font-weight: 800; color: var(--v); letter-spacing: -.02em; }
+  .verdict .score { font-size: 1.5rem; font-weight: 800; margin-left: .6rem; }
+  .verdict .why { color: var(--muted); font-size: .85rem; margin-top: .5rem; }
+  .bar { height: 8px; border-radius: 999px; background: var(--border); margin-top: .9rem; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--v); width: 100%; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  .scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  th, td { text-align: left; padding: .6rem .8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--panel); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td.wt { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+  .sev { font-weight: 700; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  .sev-critical { color: var(--critical); } .sev-high { color: var(--high); }
+  .sev-medium  { color: var(--medium); }   .sev-low  { color: var(--low); }
+  .sev-info     { color: var(--info); }
+
+  dl.meta { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1.25rem; margin: 0; }
+  dl.meta dt { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  dl.meta dd { margin: 0; word-break: break-word; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip {
+    border: 1px solid var(--border); background: var(--panel);
+    border-radius: 999px; padding: .18rem .65rem; font-size: .78rem;
+  }
+  .chip.attack { color: var(--accent); border-color: var(--accent); }
+  .note { color: var(--muted); font-size: .82rem; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .78rem; }
+</style>
+
+<div class="wrap">
+  <h1>Phishing triage report</h1>
+  <p class="sub">
+    <span class="mono">samples\credential-phish.eml</span> ·
+    generated 2026-08-22 12:43:39 UTC ·
+    offline analysis
+  </p>
+
+  <div class="verdict" style="--v: var(--malicious)">
+    <span class="label">Malicious</span><span class="score">100/100</span>
+    <div class="bar"><i></i></div>
+    <div class="why">Malicious - score 100/100 (19 indicator(s) across 4 category(ies); weight 199; +14 corroboration)</div>
+  </div>
+
+  <h2>Message</h2>
+  <dl class="meta">
+    <dt>Subject</dt><dd>Action required: unusual sign-in activity on your Microsoft account</dd>
+    <dt>From</dt><dd>Microsoft 365 Security &lt;<span class="mono">alerts[@]micros0ft-security[.]tk</span>&gt;</dd>
+<dt>Reply-To</dt><dd class="mono">credential.review[@]mail-verify-desk[.]top</dd><dt>Return-Path</dt><dd class="mono">micros0ft-security[.]tk</dd>    <dt>Date</dt><dd>Sat, 14 Mar 2026 14:12:04 +0000</dd>
+    <dt>Message-ID</dt><dd class="mono">&lt;9912847362.bulkmailer@hosting-cheap.xyz&gt;</dd>
+    <dt>Structure</dt><dd>1 relay hop(s) · 3 URL(s) · 0 attachment(s) · 2,340 bytes</dd>
+  </dl>
+
+  <h2>Indicators (19)</h2>
+      <h2 style="margin-top:1.5rem">Authentication (SPF / DKIM / DMARC)</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Severity</th><th>Wt</th><th>Indicator</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">AUTH-005</td>
+              <td class="sev sev-critical">critical</td>
+              <td class="wt">22</td>
+              <td><strong>DMARC evaluation failed</strong><br><span class="note">The message failed DMARC. The domain owner&#39;s published policy says mail like this is not legitimate.</span></td>
+              <td class="mono">Authentication-Results reports dmarc=fail</td>
+            </tr>
+            <tr>
+              <td class="mono">AUTH-001</td>
+              <td class="sev sev-high">high</td>
+              <td class="wt">18</td>
+              <td><strong>SPF hard fail</strong><br><span class="note">The sending IP is not authorised by the SPF record of the envelope domain. The sender is forging the envelope address.</span></td>
+              <td class="mono">Authentication-Results reports spf=fail</td>
+            </tr>
+            <tr>
+              <td class="mono">AUTH-004</td>
+              <td class="sev sev-low">low</td>
+              <td class="wt">4</td>
+              <td><strong>No DKIM signature</strong><br><span class="note">The message carries no DKIM signature, so body integrity cannot be confirmed.</span></td>
+              <td class="mono">No DKIM-Signature header on the message</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 style="margin-top:1.5rem">Body content</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Severity</th><th>Wt</th><th>Indicator</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">CNT-006</td>
+              <td class="sev sev-critical">critical</td>
+              <td class="wt">20</td>
+              <td><strong>Credential form embedded in the message body</strong><br><span class="note">An HTML form with a password or login field posts straight from the reader&#39;s mail client.</span></td>
+              <td class="mono">HTML form in the body collects name:otp, name:password, password</td>
+            </tr>
+            <tr>
+              <td class="mono">CNT-004</td>
+              <td class="sev sev-high">high</td>
+              <td class="wt">13</td>
+              <td><strong>Hidden text in the HTML body</strong><br><span class="note">Text rendered invisible with zero font size, display:none or background-matched colour, used to poison keyword-based filters.</span></td>
+              <td class="mono">126 characters of hidden text, e.g. &#39;newsletter update quarterly report shipping confirmation inv | hxxps[://]login[.]microsoftonline[.]com/verify&#39;</td>
+            </tr>
+            <tr>
+              <td class="mono">CNT-002</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">9</td>
+              <td><strong>Credential-harvest phrasing</strong><br><span class="note">The message asks the reader to sign in, confirm a password or re-validate an account.</span></td>
+              <td class="mono">Credential-request wording: &#39;unusual sign-in&#39;, &#39;your account has been locked&#39;, &#39;verify your account&#39;, &#39;confirm your identity&#39;</td>
+            </tr>
+            <tr>
+              <td class="mono">CNT-010</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">8</td>
+              <td><strong>Threatened consequence</strong><br><span class="note">Account closure, legal action or loss of access used as leverage.</span></td>
+              <td class="mono">Consequence wording: &#39;permanently deleted&#39;, &#39;failure to comply&#39;, &#39;loss of access&#39;</td>
+            </tr>
+            <tr>
+              <td class="mono">CNT-001</td>
+              <td class="sev sev-low">low</td>
+              <td class="wt">6</td>
+              <td><strong>Urgency and time pressure</strong><br><span class="note">Language engineered to force action before verification.</span></td>
+              <td class="mono">Urgency wording: &#39;within 24 hours&#39;</td>
+            </tr>
+            <tr>
+              <td class="mono">CNT-009</td>
+              <td class="sev sev-info">info</td>
+              <td class="wt">3</td>
+              <td><strong>Generic salutation</strong><br><span class="note">Addressed to Dear Customer or similar rather than a name.</span></td>
+              <td class="mono">Generic salutation: &#39;dear customer&#39;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 style="margin-top:1.5rem">URLs</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Severity</th><th>Wt</th><th>Indicator</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">URL-001</td>
+              <td class="sev sev-critical">critical</td>
+              <td class="wt">20</td>
+              <td><strong>Link text displays a different domain than its target</strong><br><span class="note">The anchor text shows one domain while the href points somewhere else. Rarely anything but deception.</span></td>
+              <td class="mono">Link text shows &#34;login[.]microsoftonline[.]com&#34; but the href resolves to login[.]microsoftonline[.]com[.]account-verify[.]micros0ft-security[.]tk</td>
+            </tr>
+            <tr>
+              <td class="mono">URL-010</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">10</td>
+              <td><strong>Brand name buried in a long subdomain chain</strong><br><span class="note">A trusted brand appears in the subdomain of a domain the attacker controls, for example login.microsoft.com.attacker.tld.</span></td>
+              <td class="mono">Subdomain &#34;login[.]microsoftonline[.]com[.]account-verify&#34; advertises microsoft but the domain is micros0ft-security[.]tk</td>
+            </tr>
+            <tr>
+              <td class="mono">URL-008</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">9</td>
+              <td><strong>Credential-harvest keywords in the URL path</strong><br><span class="note">Path or query terms such as login, verify, secure, account or mfa on a domain unrelated to the brand being imitated.</span></td>
+              <td class="mono">Path on micros0ft-security[.]tk contains auth, login, verify</td>
+            </tr>
+            <tr>
+              <td class="mono">URL-009</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">9</td>
+              <td><strong>Open-redirect style parameter</strong><br><span class="note">A query parameter carries another absolute URL, letting the attacker borrow a trusted domain&#39;s reputation as a first hop.</span></td>
+              <td class="mono">micros0ft-security[.]tk carries a redirect parameter redirect=hxxps[://]login[.]microsoftonline[.]com</td>
+            </tr>
+            <tr>
+              <td class="mono">URL-007</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">7</td>
+              <td><strong>High-abuse top-level domain</strong><br><span class="note">The TLD is disproportionately represented in abuse feeds, usually because registration is free or unverified.</span></td>
+              <td class="mono">Link uses the .tk TLD (micros0ft-security[.]tk)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 style="margin-top:1.5rem">Headers and routing</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Severity</th><th>Wt</th><th>Indicator</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">HDR-004</td>
+              <td class="sev sev-high">high</td>
+              <td class="wt">15</td>
+              <td><strong>Display name impersonates a known brand</strong><br><span class="note">The display name claims a well-known brand while the sending domain is unrelated to it.</span></td>
+              <td class="mono">Display name claims &#34;Microsoft 365 Security&#34; but the message was sent from micros0ft-security[.]tk</td>
+            </tr>
+            <tr>
+              <td class="mono">HDR-001</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">10</td>
+              <td><strong>Reply-To points to a different domain</strong><br><span class="note">Replies will be routed away from the apparent sender, the classic setup for conversation hijacking and BEC.</span></td>
+              <td class="mono">From: alerts@micros0ft-security[.]tk but Reply-To: credential[.]review@mail-verify-desk[.]top</td>
+            </tr>
+            <tr>
+              <td class="mono">HDR-010</td>
+              <td class="sev sev-medium">medium</td>
+              <td class="wt">7</td>
+              <td><strong>Truncated or absent Received chain</strong><br><span class="note">Fewer relay hops than a message crossing the public internet should show, consistent with direct-to-MX injection.</span></td>
+              <td class="mono">Received chain contains 1 hop(s)</td>
+            </tr>
+            <tr>
+              <td class="mono">HDR-005</td>
+              <td class="sev sev-low">low</td>
+              <td class="wt">5</td>
+              <td><strong>Message-ID domain does not match sender</strong><br><span class="note">The Message-ID was minted by infrastructure unrelated to the sending domain.</span></td>
+              <td class="mono">Message-ID was issued by hosting-cheap[.]xyz, sender domain is micros0ft-security[.]tk</td>
+            </tr>
+            <tr>
+              <td class="mono">HDR-007</td>
+              <td class="sev sev-low">low</td>
+              <td class="wt">4</td>
+              <td><strong>Bulk or scripted mailer fingerprint</strong><br><span class="note">X-Mailer or User-Agent matches a mass-mailing or scripted sending tool.</span></td>
+              <td class="mono">x-mailer: PHPMailer 6.8.0 (hxxps[://]github[.]com/PHPMailer/PHPMailer)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+  <h2>MITRE ATT&amp;CK</h2>
+  <div class="chips">
+<span class="chip attack mono">T1204.001</span><span class="chip attack mono">T1566.002</span><span class="chip attack mono">T1598.003</span><span class="chip attack mono">T1656</span>  </div>
+
+  <h2>Observables <span class="note">(defanged)</span></h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Type</th><th>Value</th></tr></thead>
+      <tbody>
+<tr><td class="mono">url</td><td class="mono">hxxps[://]cdn[.]micros0ft-security[.]tk/logo[.]png</td></tr><tr><td class="mono">url</td><td class="mono">hxxps[://]collect[.]mail-verify-desk[.]top/harvest[.]php</td></tr><tr><td class="mono">url</td><td class="mono">hxxps[://]login[.]microsoftonline[.]com[.]account-verify[.]micros0ft-security[.]tk/auth/login/verify?redirect=hxxps[://]login[.]microsoftonline[.]com</td></tr><tr><td class="mono">domain</td><td class="mono">mail-verify-desk[.]top</td></tr><tr><td class="mono">domain</td><td class="mono">micros0ft-security[.]tk</td></tr><tr><td class="mono">sender-domain</td><td class="mono">micros0ft-security[.]tk</td></tr><tr><td class="mono">ip-src</td><td class="mono">198[.]51[.]100[.]71</td></tr>      </tbody>
+    </table>
+  </div>
+
+
+  <h2>Delivery path</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>#</th><th>From</th><th>IP</th><th>By</th><th>Proto</th><th>Timestamp</th><th>Delay</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="wt">0</td>
+          <td class="mono">vps-4471.hosting-cheap.xyz</td>
+          <td class="mono">198[.]51[.]100[.]71</td>
+          <td class="mono">mx.example-corp.com</td>
+          <td class="mono">ESMTP</td>
+          <td class="mono">2026-03-14 14:12:04 +0000</td>
+          <td class="wt">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Generated by <strong>phish-triage</strong> — static analysis only. No URL was resolved and no
+    attachment was executed. Scores are a transparent weighted sum of the indicators listed above,
+    not a machine-learning prediction; treat them as triage input, not as a final determination.
+  </footer>
+</div>

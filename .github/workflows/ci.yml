@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest --cov=phishtriage --cov-report=term-missing
+
+      # The sample corpus is committed. If regenerating it produces different
+      # bytes, the committed samples are stale and the documented verdicts in
+      # the README can no longer be trusted.
+      - name: Sample corpus is reproducible
+        shell: bash
+        run: |
+          python samples/generate.py
+          git diff --exit-code -- samples/
+
+      - name: Generated docs are current
+        shell: bash
+        run: |
+          python -c "
+          import pathlib, io
+          from phishtriage import catalog
+          before = pathlib.Path('docs/indicators.md').read_text(encoding='utf-8')
+          assert f'**{len(catalog.all_indicators())} indicators**' in before, \
+              'docs/indicators.md is out of date - run: make docs'
+          "
+
+      - name: CLI smoke test
+        shell: bash
+        run: |
+          phish-triage --version
+          phish-triage indicators --format json > /dev/null
+          phish-triage analyze samples/ --format summary --fail-on never > /dev/null
+          phish-triage analyze samples/credential-phish.eml --format html -o /tmp/r.html
+          test -s /tmp/r.html

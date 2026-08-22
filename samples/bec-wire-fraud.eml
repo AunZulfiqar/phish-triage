@@ -1,0 +1,27 @@
+Received: from mail-oa1-f54.google.com (mail-oa1-f54.google.com [203.0.113.54]) by mx.example-corp.com with ESMTPS id 8Vv2; Sat, 14 Mar 2026 16:12:04 +0000
+Authentication-Results: mx.example-corp.com; spf=pass smtp.mailfrom=r.mahmood.exec@gmail.com; dkim=pass header.d=gmail.com; dmarc=pass header.from=gmail.com
+Return-Path: <r.mahmood.exec@gmail.com>
+From: Rehan Mahmood | CFO, Example Corp <r.mahmood.exec@gmail.com>
+Reply-To: r.mahmood.finance@consultant-mailbox.online
+To: aun@example-corp.com
+Subject: Re: Urgent payment
+Date: Sat, 14 Mar 2026 16:12:04 +0000
+Message-ID: <CAF9x2mQ8kL3nT@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+
+Aun,
+
+Are you available? I am in a meeting with the board and cannot talk right now.
+
+I need you to process a wire transfer to a new supplier today. The purchase
+order is approved on my side. Please keep this confidential until the
+announcement goes out on Monday - we cannot have this discussed internally yet.
+
+Reply to me here and I will send the beneficiary details and SWIFT code.
+
+This is time sensitive.
+
+Rehan Mahmood
+Chief Financial Officer
+Example Corp
+Sent from my iPhone

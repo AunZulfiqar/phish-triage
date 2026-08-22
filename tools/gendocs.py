@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Regenerate the derived documentation.
+
+``docs/indicators.md`` is generated from ``phishtriage/catalog.py`` rather than
+maintained alongside it. Hand-written detection documentation drifts from the
+code within about two commits, and a detection reference that lies is worse than
+no reference at all -- an analyst reads it to decide whether a finding matters.
+
+    python tools/gendocs.py
+"""
+
+from __future__ import annotations
+
+import io
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from phishtriage import catalog  # noqa: E402
+from phishtriage.analyzers import Context, analyze_file  # noqa: E402
+from phishtriage.reporting import terminal  # noqa: E402
+
+DOCS = ROOT / "docs"
+
+WEIGHT_KEY = (
+    ("1-3", "contextual noise; meaningful only alongside other findings"),
+    ("4-7", "a real oddity, common in marketing mail as well as phishing"),
+    ("8-14", "strong signal, unusual in legitimate mail"),
+    ("15-25", "near-conclusive on its own"),
+)
+
+
+def render_indicators() -> str:
+    out = io.StringIO()
+    out.write("# Indicator catalogue\n\n")
+    out.write("Generated from `phishtriage/catalog.py` by `make docs`. Do not edit by hand.\n\n")
+    out.write(f"**{len(catalog.all_indicators())} indicators** across "
+              f"{len(catalog.CATEGORIES)} categories.\n\n")
+    out.write("Weight is the contribution to the 0-100 risk score. See the "
+              "[scoring section](../README.md#how-the-score-is-built) of the README for how "
+              "weights combine into a verdict.\n\n")
+    out.write("| Weight range | Meaning |\n|---|---|\n")
+    for rng, meaning in WEIGHT_KEY:
+        out.write(f"| {rng} | {meaning} |\n")
+    out.write("\n")
+
+    for category in catalog.CATEGORIES:
+        rows = [i for i in catalog.all_indicators() if i.category == category]
+        out.write(f"## {category.capitalize()} ({len(rows)})\n\n")
+        out.write("| ID | Indicator | Severity | Weight | ATT&CK | What it means |\n")
+        out.write("|---|---|---|---|---|---|\n")
+        for i in rows:
+            attack = ", ".join(f"`{t}`" for t in i.attack) or "-"
+            out.write(f"| `{i.id}` | {i.name} | {i.severity.value} | {i.weight} | "
+                      f"{attack} | {i.description} |\n")
+        out.write("\n")
+    return out.getvalue()
+
+
+def render_demo() -> str:
+    from rich.console import Console
+
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=96, force_terminal=False, legacy_windows=False)
+    report = analyze_file(ROOT / "samples" / "credential-phish.eml",
+                          Context(org_domains=("example-corp.com",)))
+    terminal.render(report, console)
+    return buffer.getvalue()
+
+
+def main() -> None:
+    DOCS.mkdir(exist_ok=True)
+    for name, content in (("indicators.md", render_indicators()),
+                          ("demo-output.txt", render_demo())):
+        path = DOCS / name
+        path.write_text(content, encoding="utf-8")
+        print(f"wrote {path.relative_to(ROOT)} ({len(content):,} chars)")
+
+
+if __name__ == "__main__":
+    main()

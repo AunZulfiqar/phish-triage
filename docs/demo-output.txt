@@ -1,0 +1,129 @@
+
+╭────────────────────────────────────────── VERDICT ───────────────────────────────────────────╮
+│                                                                                              │
+│  MALICIOUS   100/100                                                                         │
+│                                                                                              │
+│  ████████████████████████████████████████                                                    │
+│                                                                                              │
+│  Malicious - score 100/100 (20 indicator(s) across 4 category(ies); weight 204; +14          │
+│  corroboration)                                                                              │
+│                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────── MESSAGE ───────────────────────────────────────────╮
+│                                                                                              │
+│  Subject      Action required: unusual sign-in activity on your Microsoft account            │
+│  From         Microsoft 365 Security <alertsmicros0ft-security[.]tk>                         │
+│  Reply-To     credential.review[@]mail-verify-desk[.]top                                     │
+│  Return-Path  micros0ft-security[.]tk                                                        │
+│  Date         Sat, 14 Mar 2026 14:12:04 +0000                                                │
+│  Message-ID   <9912847362.bulkmailer@hosting-cheap.xyz>                                      │
+│  Relay hops   1                                                                              │
+│  URLs         3                                                                              │
+│  Attachments  0                                                                              │
+│  Size         2,340 bytes                                                                    │
+│                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────── INDICATORS ─────────────────────────────────────────╮
+│                                                                                              │
+│  ────────────────────────── Authentication (SPF / DKIM / DMARC) ───────────────────────────  │
+│  ID        Sev       Wt Indicator                          Evidence                          │
+│  AUTH-005  CRITICAL  22 DMARC evaluation failed            Authentication-Results reports    │
+│                                                            dmarc=fail                        │
+│  AUTH-001  HIGH      18 SPF hard fail                      Authentication-Results reports    │
+│                                                            spf=fail                          │
+│  AUTH-004  LOW        4 No DKIM signature                  No DKIM-Signature header on the   │
+│                                                            message                           │
+│                                                                                              │
+│  ────────────────────────────────────── Body content ──────────────────────────────────────  │
+│  ID        Sev       Wt Indicator                          Evidence                          │
+│  CNT-006   CRITICAL  20 Credential form embedded in the    HTML form in the body collects    │
+│                         message body                       name:otp, name:password,          │
+│                                                            password                          │
+│  CNT-004   HIGH      13 Hidden text in the HTML body       126 characters of hidden text,    │
+│                                                            e.g. 'newsletter update           │
+│                                                            quarterly report shipping         │
+│                                                            confirmation inv |                │
+│                                                            hxxps[://]login[.]microsoftonli   │
+│                                                            ne[.]com/verify'                  │
+│  CNT-002   MEDIUM     9 Credential-harvest phrasing        Credential-request wording:       │
+│                                                            'unusual sign-in', 'your          │
+│                                                            account has been locked',         │
+│                                                            'verify your account', 'confirm   │
+│                                                            your identity'                    │
+│  CNT-010   MEDIUM     8 Threatened consequence             Consequence wording:              │
+│                                                            'permanently deleted', 'failure   │
+│                                                            to comply', 'loss of access'      │
+│  CNT-001   LOW        6 Urgency and time pressure          Urgency wording: 'within 24       │
+│                                                            hours'                            │
+│  CNT-009   INFO       3 Generic salutation                 Generic salutation: 'dear         │
+│                                                            customer'                         │
+│                                                                                              │
+│  ────────────────────────────────────────── URLs ──────────────────────────────────────────  │
+│  ID        Sev       Wt Indicator                          Evidence                          │
+│  URL-001   CRITICAL  20 Link text displays a different     Link text shows                   │
+│                         domain than its target             "login[.]microsoftonline[.]com"   │
+│                                                            but the href resolves to          │
+│                                                            login[.]microsoftonline[.]com[.   │
+│                                                            ]account-verify[.]micros0ft-sec   │
+│                                                            urity[.]tk                        │
+│  URL-010   MEDIUM    10 Brand name buried in a long        Subdomain                         │
+│                         subdomain chain                    "login[.]microsoftonline[.]com[   │
+│                                                            .]account-verify" advertises      │
+│                                                            microsoft but the domain is       │
+│                                                            micros0ft-security[.]tk           │
+│  URL-008   MEDIUM     9 Credential-harvest keywords in the Path on micros0ft-security[.]tk   │
+│                         URL path                           contains auth, login, verify      │
+│  URL-009   MEDIUM     9 Open-redirect style parameter      micros0ft-security[.]tk carries   │
+│                                                            a redirect parameter              │
+│                                                            redirect=hxxps[://]login[.]micr   │
+│                                                            osoftonline[.]com                 │
+│  URL-007   MEDIUM     7 High-abuse top-level domain        Link uses the .tk TLD             │
+│                                                            (micros0ft-security[.]tk)         │
+│                                                                                              │
+│  ────────────────────────────────── Headers and routing ───────────────────────────────────  │
+│  ID        Sev       Wt Indicator                          Evidence                          │
+│  HDR-004   HIGH      15 Display name impersonates a known  Display name claims "Microsoft    │
+│                         brand                              365 Security" but the message     │
+│                                                            was sent from                     │
+│                                                            micros0ft-security[.]tk           │
+│  HDR-001   MEDIUM    10 Reply-To points to a different     From:                             │
+│                         domain                             alerts@micros0ft-security[.]tk    │
+│                                                            but Reply-To:                     │
+│                                                            credential[.]review@mail-verify   │
+│                                                            -desk[.]top                       │
+│  HDR-010   MEDIUM     7 Truncated or absent Received chain Received chain contains 1         │
+│                                                            hop(s)                            │
+│  HDR-005   LOW        5 Message-ID domain does not match   Message-ID was issued by          │
+│                         sender                             hosting-cheap[.]xyz, sender       │
+│                                                            domain is                         │
+│                                                            micros0ft-security[.]tk           │
+│  HDR-011   LOW        5 Recipient does not appear in To or Message has no To or Cc           │
+│                         Cc                                 recipients at all                 │
+│  HDR-007   LOW        4 Bulk or scripted mailer            x-mailer: PHPMailer 6.8.0         │
+│                         fingerprint                        (hxxps[://]github[.]com/PHPMail   │
+│                                                            er/PHPMailer)                     │
+│                                                                                              │
+│                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────── MITRE ATT&CK ────────────────────────────────────────╮
+│                                                                                              │
+│  T1204.001  T1566.002  T1598.003  T1656                                                      │
+│                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭─────────────────────────────────── OBSERVABLES (defanged) ───────────────────────────────────╮
+│                                                                                              │
+│  Type       Observable                                                                       │
+│  url        hxxps[://]cdn[.]micros0ft-security[.]tk/logo[.]png                               │
+│  url        hxxps[://]collect[.]mail-verify-desk[.]top/harvest[.]php                         │
+│  url        hxxps[://]login[.]microsoftonline[.]com[.]account-verify[.]micros0ft-security    │
+│             [.]tk/auth/login/verify?redirect=hxxps[://]login[.]microsoftonline[.]com         │
+│  domain     mail-verify-desk[.]top                                                           │
+│  domain     micros0ft-security[.]tk                                                          │
+│  sender-ip  198[.]51[.]100[.]71                                                              │
+│                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+

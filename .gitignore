@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tldextract_cache/
+.DS_Store
+.idea/
+.vscode/
+
+# Analyst output. Reports generated while triaging real mail must never be
+# committed -- they quote message content verbatim.
+out/
+*.report.html
+*.report.json
+
+# ...except the checked-in demo, which is generated from the synthetic corpus.
+!docs/sample-report.html
