@@ -78,11 +78,35 @@ jobs:
           print("web app ok")
           EOF
 
+      # Exercises the documented exit-code contract rather than just checking
+      # the commands run. A malicious verdict *must* exit non-zero, so these
+      # invocations are checked explicitly instead of being allowed to trip
+      # `bash -e` -- which is what happened the first time this step ran.
       - name: CLI smoke test
         shell: bash
         run: |
+          set -euo pipefail
           phish-triage --version
           phish-triage indicators --format json > /dev/null
-          phish-triage analyze samples/ --format summary --fail-on never > /dev/null
-          phish-triage analyze samples/credential-phish.eml --format html -o /tmp/r.html
-          test -s /tmp/r.html
+          phish-triage indicators --format markdown > /dev/null
+
+          expect_exit() {
+            local want="$1"; shift
+            local got=0
+            "$@" > /dev/null 2>&1 || got=$?
+            if [ "$got" != "$want" ]; then
+              echo "expected exit $want, got $got, from: $*" >&2
+              exit 1
+            fi
+          }
+
+          expect_exit 0 phish-triage analyze samples/benign-newsletter.eml
+          expect_exit 1 phish-triage analyze samples/credential-phish.eml
+          expect_exit 0 phish-triage analyze samples/credential-phish.eml --fail-on never
+          expect_exit 2 phish-triage analyze samples/does-not-exist.eml
+          expect_exit 0 phish-triage analyze samples/ --format summary --fail-on never
+
+          phish-triage analyze samples/credential-phish.eml \
+            --format html -o report.html --fail-on never
+          test -s report.html
+          rm -f report.html
