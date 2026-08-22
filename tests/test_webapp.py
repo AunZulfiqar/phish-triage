@@ -326,11 +326,26 @@ class TestStaticAssets:
 
 
 class TestResultStore:
-    def test_results_expire(self):
+    def test_a_zero_ttl_expires_immediately(self):
         from webapp.store import ResultStore
 
         store = ResultStore(ttl_seconds=0, max_entries=10)
+        assert store.get(store.put(["report"])) is None
+
+    def test_results_expire_once_past_the_ttl(self):
+        """Aged explicitly rather than by sleeping.
+
+        Relying on wall-clock movement makes this flaky wherever the clock is
+        coarse -- the original version of this test passed on Linux and failed
+        on Windows for exactly that reason.
+        """
+        from webapp.store import ResultStore
+
+        store = ResultStore(ttl_seconds=300, max_entries=10)
         token = store.put(["report"])
+        assert store.get(token) is not None
+
+        store._entries[token].created_at -= 301
         assert store.get(token) is None
 
     def test_store_is_bounded(self):

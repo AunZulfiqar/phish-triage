@@ -98,18 +98,24 @@ class TestMarkupIsNotInterpreted:
 class TestEncodingFallback:
     """A console that cannot encode block glyphs must still get a report."""
 
-    def test_ascii_glyphs_chosen_for_a_cp1252_console(self):
-        buffer = io.StringIO()
-        console = Console(file=buffer, width=100)
-        # Simulate the Windows legacy console.
-        object.__setattr__(console, "_legacy_windows", True)
-        glyphs = terminal._glyphs(console)
-        assert glyphs == {"full": "#", "empty": ".", "dash": "-"}
+    def test_ascii_glyphs_chosen_for_a_legacy_windows_console(self):
+        # `legacy_windows` is a real Console constructor argument. An earlier
+        # version of this test forced the private `_legacy_windows` attribute
+        # instead, which Rich does not promise to honour -- it happened to work
+        # on Windows and did nothing on Linux.
+        console = Console(file=io.StringIO(), width=100, legacy_windows=True)
+        assert console.legacy_windows is True
+        assert terminal._glyphs(console) == {"full": "#", "empty": ".", "dash": "-"}
 
-    def test_unicode_glyphs_chosen_for_a_utf8_console(self):
-        console = Console(file=io.StringIO(), width=100)
-        glyphs = terminal._glyphs(console)
-        assert glyphs["full"] in ("█", "#")
+    def test_unicode_glyphs_chosen_for_a_modern_utf8_console(self):
+        buffer = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+        console = Console(file=buffer, width=100, legacy_windows=False)
+        assert terminal._glyphs(console) == {"full": "█", "empty": "░", "dash": "—"}
+
+    def test_ascii_glyphs_chosen_for_a_cp1252_stream(self):
+        buffer = io.TextIOWrapper(io.BytesIO(), encoding="cp1252")
+        console = Console(file=buffer, width=100, legacy_windows=False)
+        assert terminal._glyphs(console) == {"full": "#", "empty": ".", "dash": "-"}
 
     def test_rendering_into_a_cp1252_stream_does_not_raise(self, malicious):
         """The regression test for the original crash.

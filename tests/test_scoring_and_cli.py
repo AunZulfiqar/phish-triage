@@ -132,12 +132,19 @@ class TestEndToEnd:
             analyze_file(path, Context(online=False))
 
 
-class TestReporting:
-    @pytest.fixture(scope="class")
-    def report(self):
-        return analyze_file(SAMPLES / "credential-phish.eml",
-                            Context(org_domains=("example-corp.com",)))
+@pytest.fixture(scope="module")
+def report():
+    """Module-scoped rather than class-scoped-on-a-method.
 
+    A class-scoped fixture defined as an instance method is deprecated in
+    pytest and becomes an error in 10.x, because each test gets a fresh
+    instance while the fixture runs once.
+    """
+    return analyze_file(SAMPLES / "credential-phish.eml",
+                        Context(org_domains=("example-corp.com",)))
+
+
+class TestReporting:
     def test_json_is_serialisable_and_defanged(self, report):
         payload = json.loads(json_out.dumps(report))
         assert payload["verdict"]["label"] == "Malicious"

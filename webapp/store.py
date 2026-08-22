@@ -72,8 +72,13 @@ class ResultStore:
             return len(self._entries)
 
     def _evict_expired_locked(self) -> None:
+        # `<=`, not `<`: a TTL of zero has to mean "already expired". The clock
+        # is coarse enough on some platforms that created_at and the cutoff land
+        # on the same tick, and a strict comparison would keep the entry alive
+        # for the width of one tick -- which is exactly what ttl=0 asks it not
+        # to do.
         cutoff = time.time() - self._ttl
-        expired = [k for k, v in self._entries.items() if v.created_at < cutoff]
+        expired = [k for k, v in self._entries.items() if v.created_at <= cutoff]
         for key in expired:
             del self._entries[key]
 
