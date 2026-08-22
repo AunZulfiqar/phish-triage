@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ reports|length }} messages — phish-triage{% endblock %}
+
+{% block content %}
+<section class="hero compact">
+  <h1>{{ reports|length }} messages analysed</h1>
+  <p class="lede">Ranked worst first. Open any row for the full evidence.</p>
+</section>
+
+<div class="actions">
+  <a class="btn" href="{{ url_for('triage.download_iocs', token=token) }}">Download combined IOCs</a>
+  <form method="post" action="{{ url_for('triage.delete_report', token=token) }}" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-quiet">Discard all results</button>
+  </form>
+</div>
+
+<section class="panel">
+  <div class="tablewrap">
+    <table class="batch">
+      <thead>
+        <tr><th>Message</th><th>Verdict</th><th class="num">Score</th><th class="num">Findings</th><th>Top indicators</th></tr>
+      </thead>
+      <tbody>
+      {% for r in ranked %}
+        {% set slug = {'Benign':'benign','Suspicious':'suspicious','Likely Phishing':'likely','Malicious':'malicious'}[r.report.verdict.value] %}
+        <tr>
+          <td>
+            <a href="{{ url_for('triage.report_item', token=token, index=r.index) }}">
+              {{ r.report.email.source_path }}</a>
+            <p class="dim small">{{ defang.defang_text(r.report.email.subject) or '(no subject)' }}</p>
+          </td>
+          <td><span class="pill pill-{{ slug }}">{{ r.report.verdict.value }}</span></td>
+          <td class="num"><strong>{{ r.report.score }}</strong></td>
+          <td class="num">{{ r.report.findings|length }}</td>
+          <td class="mono small">
+            {% for f in r.report.findings[:5] %}<span class="chip">{{ f.indicator.id }}</span>{% endfor %}
+            {% if not r.report.findings %}<span class="dim">—</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

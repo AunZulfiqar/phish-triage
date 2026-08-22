@@ -27,20 +27,23 @@ dependencies = [
 
 [project.optional-dependencies]
 dns = ["dnspython>=2.6"]
-dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5"]
+web = ["flask>=3.0"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "flask>=3.0", "dnspython>=2.6"]
 
 [project.scripts]
 phish-triage = "phishtriage.cli:main"
+phish-triage-web = "webapp.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/AunZulfiqar/phish-triage"
 Issues = "https://github.com/AunZulfiqar/phish-triage/issues"
 
 [tool.setuptools.packages.find]
-include = ["phishtriage*"]
+include = ["phishtriage*", "webapp*"]
 
 [tool.setuptools.package-data]
 "phishtriage.reporting" = ["templates/*.j2"]
+"webapp" = ["templates/*.html", "static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

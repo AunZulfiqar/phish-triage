@@ -13,11 +13,11 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from ..catalog import CATEGORY_TITLES
 from ..models import Report
 from ..scoring import explain
 from ..utils import defang
 from .json_out import to_iocs
-from .terminal import _CATEGORY_TITLE
 
 _TEMPLATE_DIR = Path(__file__).parent / "templates"
 
@@ -54,7 +54,7 @@ def render(report: Report) -> str:
     return template.render(
         report=report,
         grouped=report.by_category(),
-        category_titles=_CATEGORY_TITLE,
+        category_titles=CATEGORY_TITLES,
         iocs=to_iocs(report, defanged=True),
         rationale=explain(report.score, report.verdict, report.breakdown),
         verdict_var=_VERDICT_VAR.get(report.verdict.value, "info"),

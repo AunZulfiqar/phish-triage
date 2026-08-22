@@ -53,6 +53,32 @@ jobs:
               'docs/indicators.md is out of date - run: make docs'
           "
 
+      - name: Web app smoke test
+        shell: bash
+        run: |
+          python - <<'EOF'
+          from webapp import Config, create_app
+          app = create_app(Config(secret_key="ci"))
+          client = app.test_client()
+          assert client.get("/healthz").get_json()["status"] == "ok"
+          page = client.get("/").get_data(as_text=True)
+          token = page.split('name="csrf_token" value="')[1].split('"')[0]
+          with open("samples/credential-phish.eml", "rb") as fh:
+              body = fh.read()
+          import io
+          r = client.post("/analyze", data={
+              "csrf_token": token,
+              "messages": (io.BytesIO(body), "credential-phish.eml"),
+          }, content_type="multipart/form-data")
+          assert r.status_code == 303, r.status_code
+          report = client.get(r.headers["Location"]).get_data(as_text=True)
+          assert "Malicious" in report
+          # The CSP must never be relaxed to allow inline styles or scripts.
+          csp = client.get("/").headers["Content-Security-Policy"]
+          assert "unsafe-inline" not in csp and "unsafe-eval" not in csp
+          print("web app ok")
+          EOF
+
       - name: CLI smoke test
         shell: bash
         run: |

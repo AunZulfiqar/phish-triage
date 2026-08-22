@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}phish-triage — analyse a message{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Phishing email triage</h1>
+  <p class="lede">
+    Drop in a <code>.eml</code> and get back a defanged, evidence-backed verdict — the mechanical
+    half of a phishing report, done in milliseconds instead of ten minutes.
+  </p>
+  <ul class="stat-row">
+    <li><strong>{{ indicator_count }}</strong><span>indicators</span></li>
+    <li><strong>{{ category_count }}</strong><span>categories</span></li>
+    <li><strong>0</strong><span>network calls</span></li>
+    <li><strong>0</strong><span>bytes written to disk</span></li>
+  </ul>
+</section>
+
+<form class="panel upload" method="post" action="{{ url_for('triage.analyze') }}"
+      enctype="multipart/form-data" id="analyze-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <div class="dropzone" id="dropzone" data-max-files="{{ max_files }}">
+    <input type="file" name="messages" id="messages" multiple accept=".eml,.txt,.msg"
+           class="visually-hidden">
+    <label for="messages" class="dropzone-label">
+      <span class="dropzone-icon" aria-hidden="true"></span>
+      <span class="dropzone-title">Choose <code>.eml</code> files or drop them here</span>
+      <span class="dropzone-hint">
+        Up to {{ max_files }} messages &middot; {{ max_upload_mb }} MB per request
+      </span>
+    </label>
+    <ul class="filelist" id="filelist" hidden></ul>
+  </div>
+
+  <details class="paste">
+    <summary>Or paste a raw message</summary>
+    <p class="dim small">
+      Paste the full source including headers — in Gmail, <em>Show original</em>; in Outlook,
+      <em>View message source</em>. Headers are where most of the evidence is; a body alone
+      tells you very little.
+    </p>
+    <textarea name="raw_message" rows="10" spellcheck="false"
+              placeholder="Received: from ...&#10;From: ...&#10;Subject: ..."></textarea>
+  </details>
+
+  <div class="options">
+    {% if online_available %}
+    <label class="check">
+      <input type="checkbox" name="online" id="online">
+      <span>Look up the sender's live SPF and DMARC records
+        <em class="dim">(performs DNS queries from this server)</em></span>
+    </label>
+    {% else %}
+    <p class="dim small">
+      Online checks are disabled on this instance. Everything runs offline —
+      set <code>PHISH_TRIAGE_ALLOW_ONLINE=1</code> to permit DNS lookups.
+    </p>
+    {% endif %}
+
+    {% if org_domains %}
+    <p class="dim small">
+      Treating as internal:
+      {% for d in org_domains %}<code>{{ d }}</code>{% if not loop.last %} {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn-primary">Analyse</button>
+</form>
+
+<section class="explain">
+  <h2>What it checks</h2>
+  <div class="grid">
+    <article>
+      <h3>Authentication</h3>
+      <p>SPF, DKIM and DMARC results, plus <strong>relaxed identifier alignment</strong> — whether
+      the domain that actually authenticated is the one the recipient sees.</p>
+    </article>
+    <article>
+      <h3>Headers</h3>
+      <p>Disagreement between <code>From</code>, <code>Reply-To</code>, <code>Return-Path</code>,
+      <code>Message-ID</code> and the display name. Attackers have to make one of them lie.</p>
+    </article>
+    <article>
+      <h3>URLs</h3>
+      <p>Anchor text that claims one domain while the href points at another, punycode and
+      mixed-script hosts, brand lookalikes, <code>@</code> obfuscation, open redirects.</p>
+    </article>
+    <article>
+      <h3>Attachments</h3>
+      <p>Executables, double extensions, right-to-left override, macro formats, disk-image
+      containers. Hashed, never opened.</p>
+    </article>
+    <article>
+      <h3>Content</h3>
+      <p>Credential forms in the body, text hidden with CSS, zero-width characters, and the
+      payload-free shape of a business-email-compromise opener.</p>
+    </article>
+    <article class="muted">
+      <h3>Not a classifier</h3>
+      <p>The score is a transparent weighted sum over
+      <a href="{{ url_for('triage.indicators') }}">a published catalogue</a>. Every point traces
+      to a named indicator you can argue with.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

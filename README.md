@@ -2,13 +2,13 @@
 
 # phish-triage
 
-**Offline-first phishing email triage for SOC analysts.**
+**Offline-first phishing email triage for SOC analysts — CLI, web UI and JSON API.**
 
 Drop in a `.eml`, get back a defanged, evidence-backed verdict you can paste straight into a ticket.
 
 [![CI](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml/badge.svg)](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-119%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-153%20passing-2ea44f)
 ![Coverage](https://img.shields.io/badge/coverage-86%25-2ea44f)
 ![Indicators](https://img.shields.io/badge/indicators-58-3B82F6)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
@@ -129,6 +129,69 @@ phish-triage analyze suspicious.eml --online
 phish-triage indicators
 ```
 
+## Web UI
+
+A hardened Flask front end over the same engine — drop files in, get the report in a browser,
+download JSON/HTML/IOCs. Optional; the CLI has no dependency on it.
+
+```bash
+pip install -e ".[web]"
+phish-triage-web --org-domain yourcompany.com
+# http://127.0.0.1:8000
+```
+
+| Route | Purpose |
+|---|---|
+| `GET /` | upload / paste form |
+| `POST /analyze` | analyse, redirect to a report |
+| `GET /report/<token>` | single report, or a ranked table for a batch |
+| `GET /report/<token>/download/<n>.json` · `.html` · `iocs.json` | downloads |
+| `GET /indicators` | the catalogue, rendered from the same source the scorer uses |
+| `POST /api/analyze` | JSON API — multipart, or `{"raw": "..."}` |
+| `GET /healthz` | liveness |
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/analyze \
+  -H 'Content-Type: application/json' \
+  -d "$(jq -Rs '{raw: .}' < suspicious.eml)" | jq '.verdict'
+```
+
+### How it is hardened
+
+This application is handed live phishing mail on purpose, which drives every design decision:
+
+- **The message body is never rendered as HTML.** Not in a sandboxed iframe, not through a
+  sanitiser. It is reported *about*, never reproduced. Phishing HTML is purpose-built to defeat
+  sanitisers, and a sanitiser bug would execute the payload on the analyst's own origin.
+- **CSP is `default-src 'none'` with no `unsafe-inline`.** There is not a single inline style or
+  script — the score bar's width is carried in a `data-` attribute and applied from a static JS
+  file. If a rendering bug ever did emit attacker markup, a tracking pixel still could not fire
+  and confirm the message was opened.
+- **Nothing touches disk.** Results live in a bounded, expiring in-memory store. Uploaded mail is
+  evidence containing third-party personal data; persisting it would create a retention
+  obligation and buy nothing. A restart loses everything, which is correct.
+- **Offline unless explicitly enabled.** `PHISH_TRIAGE_ALLOW_ONLINE=1` is required before the
+  server will resolve a single DNS record, and a request cannot force it on.
+- CSRF tokens on every state-changing form, per-IP rate limiting, a 4 MB body cap, strict
+  upload-extension checks, `X-Forwarded-For` ignored unless a proxy is declared trusted, and
+  server errors that never echo the exception (it can contain message fragments).
+
+Flask's dev server is for development. Behind anything shared, use a real WSGI server and put
+authentication in front of it:
+
+```bash
+waitress-serve --listen 127.0.0.1:8000 "webapp:create_app()"
+```
+
+| Environment variable | Default | Purpose |
+|---|---|---|
+| `PHISH_TRIAGE_SECRET_KEY` | random per start | session signing |
+| `PHISH_TRIAGE_ALLOW_ONLINE` | `0` | permit live SPF/DMARC lookups |
+| `PHISH_TRIAGE_ORG_DOMAINS` | — | comma-separated domains you own |
+| `PHISH_TRIAGE_MAX_UPLOAD` | `4194304` | request body cap in bytes |
+| `PHISH_TRIAGE_RESULT_TTL` | `1800` | seconds before a result is dropped |
+| `PHISH_TRIAGE_RATE_LIMIT` | `60` | requests per window per client |
+
 ### Exit codes
 
 Chosen so the tool drops into a mail-gateway pipeline or a CI check:
@@ -218,11 +281,13 @@ containment tool.
 ## Development
 
 ```bash
-pip install -e ".[dev]"
-pytest                       # 119 tests
-pytest --cov=phishtriage     # 86% coverage
+pip install -e ".[dev]"          # includes the web extra
+pytest                           # 153 tests
+pytest --cov=phishtriage --cov=webapp
 ruff check .
-python samples/generate.py   # regenerate the sample corpus
+python samples/generate.py       # regenerate the synthetic corpus
+python tools/gendocs.py          # regenerate docs/ from the catalogue
+python -m webapp --port 8000     # run the web UI
 ```
 
 ## Limitations
@@ -238,6 +303,8 @@ Stated plainly, because a security tool that oversells itself is worse than none
 - **The lookalike brand list is small and hand-curated.** It covers commonly impersonated
   brands, not the top million domains. Add your own organisation's domains — most phishing an
   organisation receives imitates that organisation.
+- **The web UI has no authentication.** It is built to run on localhost or behind something
+  that does authenticate. Do not expose it directly.
 - **The weights are reasoned, not learned.** They were tuned against a five-message corpus and
   a reading of what each indicator means. They are a defensible starting point, not an
   empirically optimised one, and should be re-tuned against your own mail.

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — phish-triage{% endblock %}
+
+{% block content %}
+<section class="panel errorbox">
+  <p class="errorcode">{{ code }}</p>
+  <h1>{{ {400:'Bad request', 403:'Forbidden', 404:'Not found', 413:'Upload too large', 422:'Could not parse', 429:'Slow down', 500:'Server error'}.get(code, 'Error') }}</h1>
+  <p>{{ message }}</p>
+  <p><a class="btn-primary" href="{{ url_for('triage.index') }}">Analyse another message</a></p>
+</section>
+{% endblock %}

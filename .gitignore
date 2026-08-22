@@ -22,3 +22,6 @@ out/
 
 # ...except the checked-in demo, which is generated from the synthetic corpus.
 !docs/sample-report.html
+
+# Local editor/tooling config
+.claude/

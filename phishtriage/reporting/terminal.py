@@ -13,6 +13,7 @@ from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
+from ..catalog import CATEGORY_TITLES
 from ..models import Report, Severity
 from ..scoring import explain
 from ..utils import defang
@@ -25,13 +26,8 @@ _SEVERITY_STYLE = {
     Severity.INFO: "dim",
 }
 
-_CATEGORY_TITLE = {
-    "authentication": "Authentication (SPF / DKIM / DMARC)",
-    "headers": "Headers and routing",
-    "urls": "URLs",
-    "attachments": "Attachments",
-    "content": "Body content",
-}
+# Re-exported for the HTML renderer, which shares these section names.
+_CATEGORY_TITLE = CATEGORY_TITLES
 
 
 def _glyphs(console: Console) -> dict[str, str]:

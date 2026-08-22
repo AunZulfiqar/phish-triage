@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Indicator catalogue — phish-triage{% endblock %}
+
+{% block content %}
+<section class="hero compact">
+  <h1>Indicator catalogue</h1>
+  <p class="lede">
+    Every rule the scorer can fire, with the weight it contributes. This page is rendered from the
+    same source the engine scores from, so it cannot drift from the behaviour.
+  </p>
+  <ul class="stat-row">
+    <li><strong>{{ total }}</strong><span>indicators</span></li>
+    <li><strong>{{ grouped|length }}</strong><span>categories</span></li>
+  </ul>
+</section>
+
+<section class="panel">
+  <h2>Reading the weights</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Range</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1&ndash;3</td><td>contextual noise; meaningful only alongside other findings</td></tr>
+        <tr><td class="mono">4&ndash;7</td><td>a real oddity, common in marketing mail as well as phishing</td></tr>
+        <tr><td class="mono">8&ndash;14</td><td>strong signal, unusual in legitimate mail</td></tr>
+        <tr><td class="mono">15&ndash;25</td><td>near-conclusive on its own</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% for category, items in grouped.items() %}
+<section class="panel">
+  <h2>{{ category|capitalize }} <span class="count">{{ items|length }}</span></h2>
+  <div class="tablewrap">
+    <table class="findings">
+      <thead><tr><th>ID</th><th>Severity</th><th class="num">Wt</th><th>Indicator</th><th>ATT&amp;CK</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr>
+          <td class="mono nowrap">{{ i.id }}</td>
+          <td><span class="sev sev-{{ i.severity.value }}">{{ i.severity.value }}</span></td>
+          <td class="num">{{ i.weight }}</td>
+          <td><strong>{{ i.name }}</strong><p class="dim small">{{ i.description }}</p></td>
+          <td class="nowrap">
+            {% for t in i.attack %}<span class="chip chip-attack">{{ t }}</span>{% endfor %}
+            {% if not i.attack %}<span class="dim">&mdash;</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

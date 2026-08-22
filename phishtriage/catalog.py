@@ -200,6 +200,16 @@ BY_ID: dict[str, Indicator] = {i.id: i for i in _ALL}
 
 CATEGORIES: tuple[str, ...] = ("authentication", "headers", "urls", "attachments", "content")
 
+# Display names, kept beside the categories they label so that every renderer --
+# terminal, HTML and web -- names a section the same way.
+CATEGORY_TITLES: dict[str, str] = {
+    "authentication": "Authentication (SPF / DKIM / DMARC)",
+    "headers": "Headers and routing",
+    "urls": "URLs",
+    "attachments": "Attachments",
+    "content": "Body content",
+}
+
 
 def get(indicator_id: str) -> Indicator:
     try:
