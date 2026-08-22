@@ -200,11 +200,11 @@ def bec_wire_fraud() -> bytes:
         ("Received", f"from mail-oa1-f54.google.com (mail-oa1-f54.google.com "
                      f"[203.0.113.54]) by mx.example-corp.com with ESMTPS id 8Vv2; {rfc(t)}"),
         ("Authentication-Results", "mx.example-corp.com; spf=pass "
-                                   "smtp.mailfrom=r.mahmood.exec@gmail.com; dkim=pass "
+                                   "smtp.mailfrom=rehan.mahmood.invalid@gmail.com; dkim=pass "
                                    "header.d=gmail.com; dmarc=pass header.from=gmail.com"),
-        ("Return-Path", "<r.mahmood.exec@gmail.com>"),
-        ("From", "Rehan Mahmood | CFO, Example Corp <r.mahmood.exec@gmail.com>"),
-        ("Reply-To", "r.mahmood.finance@consultant-mailbox.online"),
+        ("Return-Path", "<rehan.mahmood.invalid@gmail.com>"),
+        ("From", "Rehan Mahmood | CFO, Example Corp <rehan.mahmood.invalid@gmail.com>"),
+        ("Reply-To", "r.mahmood.invalid@consultant-mailbox.online"),
         ("To", "aun@example-corp.com"),
         ("Subject", "Re: Urgent payment"),
         ("Date", rfc(t)),
