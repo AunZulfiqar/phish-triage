@@ -13,13 +13,14 @@ from __future__ import annotations
 
 import io
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from phishtriage import catalog  # noqa: E402
-from phishtriage.analyzers import Context, analyze_file  # noqa: E402
+from phishtriage.analyzers import Context, analyze_bytes  # noqa: E402
 from phishtriage.reporting import html_out, terminal  # noqa: E402
 
 DOCS = ROOT / "docs"
@@ -62,9 +63,19 @@ def render_indicators() -> str:
 DEMO_CTX = Context(org_domains=("example-corp.com",))
 DEMO_SAMPLE = "credential-phish.eml"
 
+# Committed artifacts must be byte-identical on every machine, so the two
+# things that vary between runs are pinned: the source label (which would
+# otherwise embed the generating machine's absolute filesystem path into a
+# public file) and the generation timestamp.
+DEMO_SOURCE_LABEL = f"samples/{DEMO_SAMPLE}"
+DEMO_TIMESTAMP = datetime(2026, 3, 14, 9, 12, 4, tzinfo=timezone.utc)
+
 
 def _demo_report():
-    return analyze_file(ROOT / "samples" / DEMO_SAMPLE, DEMO_CTX)
+    raw = (ROOT / "samples" / DEMO_SAMPLE).read_bytes()
+    report = analyze_bytes(raw, DEMO_SOURCE_LABEL, DEMO_CTX)
+    report.generated_at = DEMO_TIMESTAMP
+    return report
 
 
 def render_demo() -> str:
@@ -86,7 +97,11 @@ def main() -> None:
                           ("demo-output.txt", render_demo()),
                           ("sample-report.html", render_sample_html())):
         path = DOCS / name
-        path.write_text(content, encoding="utf-8")
+        # newline="" stops Python's text layer rewriting line endings to the
+        # platform default. Without it a file generated on Windows and
+        # regenerated on Linux differs byte-for-byte, and the reproducibility
+        # check can never pass on both.
+        path.write_text(content, encoding="utf-8", newline="")
         print(f"wrote {path.relative_to(ROOT)} ({len(content):,} chars)")
 
 

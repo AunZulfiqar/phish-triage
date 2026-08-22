@@ -42,16 +42,15 @@ jobs:
           python samples/generate.py
           git diff --exit-code -- samples/
 
+      # docs/ is generated from the catalogue and the sample corpus. If
+      # regenerating changes anything, the committed reference disagrees with
+      # what the code actually does -- which is the one thing a detection
+      # reference must never do.
       - name: Generated docs are current
         shell: bash
         run: |
-          python -c "
-          import pathlib, io
-          from phishtriage import catalog
-          before = pathlib.Path('docs/indicators.md').read_text(encoding='utf-8')
-          assert f'**{len(catalog.all_indicators())} indicators**' in before, \
-              'docs/indicators.md is out of date - run: make docs'
-          "
+          python tools/gendocs.py
+          git diff --exit-code -- docs/
 
       - name: Web app smoke test
         shell: bash
