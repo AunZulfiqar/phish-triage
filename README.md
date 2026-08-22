@@ -8,10 +8,17 @@ Drop in a `.eml`, get back a defanged, evidence-backed verdict you can paste str
 
 [![CI](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml/badge.svg)](https://github.com/AunZulfiqar/phish-triage/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-153%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-158%20passing-2ea44f)
 ![Coverage](https://img.shields.io/badge/coverage-86%25-2ea44f)
 ![Indicators](https://img.shields.io/badge/indicators-58-3B82F6)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+<br/>
+
+<img src="docs/screenshots/02-report.png" width="100%" alt="phish-triage report: a Microsoft-impersonating credential phish scored Malicious 100/100, showing the sender identities that disagree and the DMARC, SPF and DKIM findings with their evidence" />
+
+<sub>Every screenshot on this page is generated from the synthetic corpus in <code>samples/</code> by
+<a href="tools/screenshots.py"><code>tools/screenshots.py</code></a> — no real mail.</sub>
 
 </div>
 
@@ -156,6 +163,35 @@ curl -s -X POST http://127.0.0.1:8000/api/analyze \
   -d "$(jq -Rs '{raw: .}' < suspicious.eml)" | jq '.verdict'
 ```
 
+### The interface
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/screenshots/01-analyse.png" alt="The upload form: a drop zone for .eml files, a collapsed panel for pasting a raw message, and a note that online checks are disabled on this instance" /><br/>
+<sub><b>Analyse</b> — drop <code>.eml</code> files or paste a raw message. The counters state the
+things that matter about how it runs: no network calls, nothing written to disk.</sub>
+</td>
+<td width="50%" valign="top">
+<img src="docs/screenshots/04-batch.png" alt="Batch view: five analysed messages ranked worst first, showing two Malicious, one Likely Phishing and two Benign with their scores and top indicator IDs" /><br/>
+<sub><b>Batch</b> — a reported-phishing folder, ranked worst first. The two <em>Benign</em> rows are
+the false-positive control, not filler.</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/screenshots/03-indicators.png" alt="The full indicator list for a malicious message, grouped by category, each row showing the indicator ID, severity, weight, description, ATT&CK techniques and the exact evidence that fired it" /><br/>
+<sub><b>Evidence</b> — every indicator that fired, with its weight, its ATT&amp;CK mapping and the
+exact header, URL or filename that triggered it. Nothing is a black box.</sub>
+</td>
+<td width="50%" valign="top">
+<img src="docs/screenshots/05-catalogue.png" alt="The indicator catalogue page listing all 58 rules grouped by category with severity, weight and ATT&CK mapping" /><br/>
+<sub><b>Catalogue</b> — all 58 rules, rendered from the same source the scorer uses, so the
+published reference cannot drift from the behaviour.</sub>
+</td>
+</tr>
+</table>
+
 ### How it is hardened
 
 This application is handed live phishing mail on purpose, which drives every design decision:
@@ -282,11 +318,12 @@ containment tool.
 
 ```bash
 pip install -e ".[dev]"          # includes the web extra
-pytest                           # 153 tests
+pytest                           # 158 tests
 pytest --cov=phishtriage --cov=webapp
 ruff check .
 python samples/generate.py       # regenerate the synthetic corpus
 python tools/gendocs.py          # regenerate docs/ from the catalogue
+python tools/screenshots.py      # regenerate the README screenshots (needs Chrome)
 python -m webapp --port 8000     # run the web UI
 ```
 

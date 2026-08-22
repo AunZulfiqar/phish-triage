@@ -1,4 +1,4 @@
-.PHONY: help install test lint cov samples docs demo clean
+.PHONY: help install test lint cov samples docs shots web demo clean
 
 help:
 	@echo "install  - editable install with dev extras"
@@ -7,6 +7,8 @@ help:
 	@echo "lint     - ruff"
 	@echo "samples  - regenerate the synthetic sample corpus"
 	@echo "docs     - regenerate docs/indicators.md and docs/demo-output.txt"
+	@echo "shots    - regenerate the README screenshots (needs Chrome)"
+	@echo "web      - run the web UI on :8000"
 	@echo "demo     - analyse the sample corpus"
 
 install:
@@ -26,6 +28,12 @@ samples:
 
 docs:
 	python tools/gendocs.py
+
+shots:
+	python tools/screenshots.py
+
+web:
+	python -m webapp --port 8000
 
 demo:
 	python -m phishtriage analyze samples/ --format summary --fail-on never
